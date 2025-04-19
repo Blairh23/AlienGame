@@ -13,7 +13,8 @@ public class Constants {
 	
 	//Speed of the application
 	public static final int GAME_SPEED = 10;
-	
+	public static final int SPACESHIP_WIDTH = 34;
+	public static final int SPACESHIP_HEIGHT = 28;
 	// images for objects
 	public static final String UFO_IMAGE_URL = "Images/ufo.png";
 	public static final String LASER_IMAGE_URL = "Images/laser.png";
