@@ -10,6 +10,8 @@ public class Constants {
 	
 	public static final int BOARD_WIDTH = 900;
 	public static final int BOARD_HEIGHT = 750;
+	public static final int BOARDER_PADDING = 50;
+	public static final int GO_DOWN = 30;
 	
 	//Speed of the application
 	public static final int GAME_SPEED = 10;
@@ -30,5 +32,8 @@ public class Constants {
 	public static final String SPACESHIP_IMAGE_URL = "Images/spaceship.png";
 	// speed of the lazar
 	public static final int LASER_HORIZONTAL_TRANSLATION = 4;
+	//Bomb
+	public static final int BOMB_HEIGHT = 6;
+	public static final double BOMB_DROPPING_PROBABILITY = 0.0005;
 	
 }

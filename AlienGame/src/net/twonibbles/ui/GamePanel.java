@@ -5,7 +5,9 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -15,6 +17,7 @@ import net.twonibbles.callbacks.GameEventsListener;
 import net.twonibbles.constants.Constants;
 import net.twonibbles.image.Image;
 import net.twonibbles.image.ImageFactory;
+import net.twonibbles.model.Bomb;
 import net.twonibbles.model.EnemyShip;
 import net.twonibbles.model.Laser;
 import net.twonibbles.model.SpaceShip;
@@ -28,6 +31,8 @@ public class GamePanel extends JPanel{
 	private boolean inGame = true;
 	private int direction = -1;
 	private List<EnemyShip> enemyShips;
+	private List<Bomb> bomb;
+	private Random generator;
 	
 	public GamePanel() {
 		initializeVariables();
@@ -47,6 +52,8 @@ public class GamePanel extends JPanel{
 	}
 
 	private void initializeVariables() {
+		this.generator = new Random();
+		this.bomb = new ArrayList<>();
 		this.enemyShips = new ArrayList<>();
 		this.spaceShip = new SpaceShip();
 		this.laser = new Laser();
@@ -91,6 +98,8 @@ public class GamePanel extends JPanel{
 			drawPlayer(g);
 			drawLaser(g);
 			drawAliens(g);
+			drawBombs(g);
+			
 		} else {
 			if(timer.isRunning()) {
 				timer.stop();
@@ -98,6 +107,14 @@ public class GamePanel extends JPanel{
 		}
 		
 		Toolkit.getDefaultToolkit().sync();
+		
+	}
+
+	private void drawBombs(Graphics g) {
+		for(Bomb bomb : this.bomb)
+			if(!bomb.isDead())
+				g.drawImage(bomb.getImage(), bomb.getX(), bomb.getY(), this);
+		
 		
 	}
 
@@ -114,8 +131,40 @@ public class GamePanel extends JPanel{
 	private void update() {
 		this.spaceShip.move();
 		this.laser.move();
+		
+		for(EnemyShip enemyShip : this.enemyShips) {
+			if(enemyShip.getX() >= Constants.BOARD_WIDTH - 2 * Constants.BOARDER_PADDING && direction != -1 || enemyShip.getX() <= Constants.BOARDER_PADDING && direction != 1) {
+				direction *= -1;
+				Iterator<EnemyShip> ufoIterator = enemyShips.iterator();
+				
+				while(ufoIterator.hasNext()) {
+					EnemyShip ufo = ufoIterator.next();
+					ufo.setY(ufo.getY() + Constants.GO_DOWN);
+				}
+			}
+						
+			if(enemyShip.isVisible()) {
+				enemyShip.move(direction);
+			}
+		}
+		
+		//Bombs are generated
+		for(EnemyShip enemyShip : this.enemyShips) {
+			if(enemyShip.isVisible() && generator.nextDouble() < Constants.BOMB_DROPPING_PROBABILITY) {
+				Bomb bomb = new Bomb(enemyShip.getX(), enemyShip.getY());
+				this.bomb.add(bomb); 
+			}
+		}
+		
+		//move bomb
+		for(Bomb bomb : bomb) {
+			if(!bomb.isDead()) {
+				bomb.move();
+			}
+		}
 	}
-
+	
+	
 	public void keyPressed(KeyEvent e) {
 		this.spaceShip.keyPressed(e);
 		
