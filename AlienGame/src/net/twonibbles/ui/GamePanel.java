@@ -1,6 +1,9 @@
 package net.twonibbles.ui;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -33,6 +36,8 @@ public class GamePanel extends JPanel{
 	private List<EnemyShip> enemyShips;
 	private List<Bomb> bomb;
 	private Random generator;
+	private String message;
+	private int deaths;
 	
 	public GamePanel() {
 		initializeVariables();
@@ -104,9 +109,24 @@ public class GamePanel extends JPanel{
 			if(timer.isRunning()) {
 				timer.stop();
 			}
+			
+			drawGameOver(g);
 		}
 		
 		Toolkit.getDefaultToolkit().sync();
+		
+	}
+
+	private void drawGameOver(Graphics g) {
+		
+		g.drawImage(backgroundImage.getImage(), 0, 0, null);
+		
+		Font font = new Font("Helvatica", Font.BOLD,50);
+		FontMetrics  fontMetrics = this.getFontMetrics(font);
+		
+		g.setColor(Color.white);
+		g.setFont(font);
+		g.drawString(message, (Constants.BOARD_WIDTH - fontMetrics.stringWidth(message)) / 2, Constants.BOARD_HEIGHT / 2 - 100);
 		
 	}
 
@@ -129,8 +149,45 @@ public class GamePanel extends JPanel{
 	}
 
 	private void update() {
+		// Game Over
+		if(spaceShip.isDead()) {
+			inGame = false;
+			message = Constants.GAME_OVER;
+		}
+		
+		// player wins.
+		if(deaths == this.enemyShips.size()) { 
+			inGame = false;
+			message = Constants.WIN;
+		}
+		
 		this.spaceShip.move();
-		this.laser.move();
+		
+		if(!laser.isDead()) {
+			
+			int shotX = laser.getX();
+			int shotY = laser.getY();
+			
+			for(EnemyShip alien : this.enemyShips) {
+				int alienX = alien.getX();
+				int alienY = alien.getY();
+				
+				if(!alien.isVisible()) continue;
+				
+				// collison dection statement
+				
+				if(shotX >= (alienX) && shotX <= (alienX + Constants.ENEMY_SHIP_WIDTH) 
+						&& shotY >= (alienY) && shotY <= (alienY + Constants.ENEMY_SHIP_HEIGHT)) {
+					alien.setVisible(false);
+					laser.die();
+					deaths++;
+				}
+			}
+				
+			this.laser.move();
+			
+		}
+		
 		
 		for(EnemyShip enemyShip : this.enemyShips) {
 			if(enemyShip.getX() >= Constants.BOARD_WIDTH - 2 * Constants.BOARDER_PADDING && direction != -1 || enemyShip.getX() <= Constants.BOARDER_PADDING && direction != 1) {
@@ -144,6 +201,11 @@ public class GamePanel extends JPanel{
 			}
 						
 			if(enemyShip.isVisible()) {
+				
+				if(enemyShip.getY() > Constants.BOARD_HEIGHT - 100 - Constants.SPACESHIP_HEIGHT) {
+					spaceShip.die();
+				}
+				
 				enemyShip.move(direction);
 			}
 		}
@@ -158,6 +220,20 @@ public class GamePanel extends JPanel{
 		
 		//move bomb
 		for(Bomb bomb : bomb) {
+			
+			int bombX = bomb.getX();
+			int bombY = bomb.getY();
+			int spaceshipX = spaceShip.getX();
+			int spaceshipY = spaceShip.getY();
+			
+			if(!bomb.isDead() && !spaceShip.isDead()){
+				if(bombX >= (spaceshipX) && bombX <= (spaceshipX + Constants.ENEMY_SHIP_WIDTH) 
+						&& bombY >= (spaceshipY) && bombY <= (spaceshipY + Constants.ENEMY_SHIP_HEIGHT)) {
+					bomb.die();
+					spaceShip.die();
+				}
+			}
+			
 			if(!bomb.isDead()) {
 				bomb.move();
 			}

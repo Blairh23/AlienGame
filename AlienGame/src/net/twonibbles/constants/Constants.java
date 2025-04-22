@@ -13,6 +13,11 @@ public class Constants {
 	public static final int BOARDER_PADDING = 50;
 	public static final int GO_DOWN = 30;
 	
+	// game messages
+	public static final String WIN = "WIN!";
+	public static final String GAME_OVER = "GAME OVER";
+	
+	
 	//Speed of the application
 	public static final int GAME_SPEED = 10;
 	public static final int SPACESHIP_WIDTH = 34;
